@@ -1,45 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import { Menu, X, Plus, Download, Upload, Trash2, Moon, Sun, RotateCcw } from 'lucide-react';
-import { Lists } from './types';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import { Menu, X, Plus, Download, Upload, Trash2, Moon, Sun, RotateCcw } from "lucide-react";
+import { Lists } from "./types";
+import "./App.css";
 
 const App: React.FC = () => {
-  // State management
   const [lists, setLists] = useState<Lists>(() => {
-    const saved = localStorage.getItem('taskLists');
+    const saved = localStorage.getItem("taskLists");
     return saved ? JSON.parse(saved) : {
-      'Bedtime Routine': {
+      "Bedtime Routine": {
         tasks: [
-          { id: '1', text: 'Take supplements', checked: false },
-          { id: '2', text: 'Brush teeth', checked: false },
-          { id: '3', text: 'Set alarm', checked: false }
+          { id: "1", text: "Take supplements", checked: false },
+          { id: "2", text: "Brush teeth", checked: false },
+          { id: "3", text: "Set alarm", checked: false }
         ]
       }
     };
   });
   
-  const [currentList, setCurrentList] = useState<string>(Object.keys(lists)[0] || '');
+  const [currentList, setCurrentList] = useState<string>(Object.keys(lists)[0] || "");
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
-  const [newListName, setNewListName] = useState<string>('');
-  const [newTask, setNewTask] = useState<string>('');
+  const [newListName, setNewListName] = useState<string>("");
+  const [newTask, setNewTask] = useState<string>("");
   const [isDark, setIsDark] = useState<boolean>(() => 
-    window.matchMedia('(prefers-color-scheme: dark)').matches
+    window.matchMedia("(prefers-color-scheme: dark)").matches
   );
 
-  // Save to localStorage whenever lists change
   useEffect(() => {
-    localStorage.setItem('taskLists', JSON.stringify(lists));
+    localStorage.setItem("taskLists", JSON.stringify(lists));
   }, [lists]);
 
-  // Dark mode listener
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = (e: MediaQueryListEvent) => setIsDark(e.matches);
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 
-  // Add new list
   const addList = (e: React.FormEvent) => {
     e.preventDefault();
     if (newListName.trim()) {
@@ -48,12 +44,11 @@ const App: React.FC = () => {
         [newListName]: { tasks: [] }
       }));
       setCurrentList(newListName);
-      setNewListName('');
+      setNewListName("");
       setMenuOpen(false);
     }
   };
 
-  // Add new task
   const addTask = (e: React.FormEvent) => {
     e.preventDefault();
     if (newTask.trim()) {
@@ -66,11 +61,10 @@ const App: React.FC = () => {
           ]
         }
       }));
-      setNewTask('');
+      setNewTask("");
     }
   };
 
-  // Toggle task
   const toggleTask = (taskId: string) => {
     setLists(prev => ({
       ...prev,
@@ -82,7 +76,6 @@ const App: React.FC = () => {
     }));
   };
 
-  // Delete task
   const deleteTask = (taskId: string) => {
     setLists(prev => ({
       ...prev,
@@ -92,16 +85,14 @@ const App: React.FC = () => {
     }));
   };
 
-  // Delete list
   const deleteList = (listName: string) => {
     setLists(prev => {
       const { [listName]: _, ...rest } = prev;
       return rest;
     });
-    setCurrentList(Object.keys(lists)[0] || '');
+    setCurrentList(Object.keys(lists)[0] || "");
   };
 
-  // Reset current list
   const resetList = () => {
     setLists(prev => ({
       ...prev,
@@ -111,28 +102,28 @@ const App: React.FC = () => {
     }));
   };
 
-  // Export lists
   const exportLists = () => {
     const dataStr = JSON.stringify(lists, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', 'task-lists.json');
+    const dataUri = "data:application/json;charset=utf-8,"+ encodeURIComponent(dataStr);
+    const linkElement = document.createElement("a");
+    linkElement.setAttribute("href", dataUri);
+    linkElement.setAttribute("download", "task-lists.json");
     linkElement.click();
   };
 
-  // Import lists
   const importLists = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = (event) => {
         try {
-          const imported = JSON.parse(e.target.result as string);
-          setLists(imported);
-          setCurrentList(Object.keys(imported)[0] || '');
+          if (event.target?.result) {
+            const imported = JSON.parse(event.target.result as string);
+            setLists(imported);
+            setCurrentList(Object.keys(imported)[0] || "");
+          }
         } catch (err) {
-          alert('Invalid file format');
+          alert("Invalid file format");
         }
       };
       reader.readAsText(file);
@@ -140,16 +131,15 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
-      {/* Header */}
-      <header className={`p-4 flex items-center justify-between ${isDark ? 'bg-gray-800' : 'bg-gray-100'}`}>
+    <div className={`min-h-screen ${isDark ? "bg-gray-900 text-white" : "bg-white text-gray-900"}`}>
+      <header className={`p-4 flex items-center justify-between ${isDark ? "bg-gray-800" : "bg-gray-100"}`}>
         <button 
           onClick={() => setMenuOpen(!menuOpen)}
           className="p-2 rounded-lg hover:bg-opacity-80"
         >
           <Menu size={24} />
         </button>
-        <h1 className="text-xl font-bold">{currentList || 'Task Lists'}</h1>
+        <h1 className="text-xl font-bold">{currentList || "Task Lists"}</h1>
         <button 
           onClick={() => setIsDark(!isDark)}
           className="p-2 rounded-lg hover:bg-opacity-80"
@@ -158,9 +148,8 @@ const App: React.FC = () => {
         </button>
       </header>
 
-      {/* Sidebar Menu */}
       {menuOpen && (
-        <div className={`fixed inset-0 z-50 ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
+        <div className={`fixed inset-0 z-50 ${isDark ? "bg-gray-900" : "bg-white"}`}>
           <div className="p-4">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold">Your Lists</h2>
@@ -172,7 +161,6 @@ const App: React.FC = () => {
               </button>
             </div>
 
-            {/* New List Form */}
             <form onSubmit={addList} className="mb-4">
               <div className="flex gap-2">
                 <input
@@ -181,7 +169,7 @@ const App: React.FC = () => {
                   onChange={(e) => setNewListName(e.target.value)}
                   placeholder="New list name"
                   className={`flex-1 p-2 rounded-lg ${
-                    isDark ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-900'
+                    isDark ? "bg-gray-800 text-white" : "bg-gray-100 text-gray-900"
                   }`}
                 />
                 <button 
@@ -193,7 +181,6 @@ const App: React.FC = () => {
               </div>
             </form>
 
-            {/* Lists */}
             <div className="space-y-2">
               {Object.keys(lists).map(listName => (
                 <div 
@@ -219,7 +206,6 @@ const App: React.FC = () => {
               ))}
             </div>
 
-            {/* Import/Export */}
             <div className="mt-6 space-y-2">
               <button
                 onClick={exportLists}
@@ -243,11 +229,9 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* Main Content */}
       <main className="p-4 max-w-md mx-auto">
         {currentList && (
           <>
-            {/* New Task Form */}
             <form onSubmit={addTask} className="mb-4">
               <div className="flex gap-2">
                 <input
@@ -256,7 +240,7 @@ const App: React.FC = () => {
                   onChange={(e) => setNewTask(e.target.value)}
                   placeholder="New task"
                   className={`flex-1 p-2 rounded-lg ${
-                    isDark ? 'bg-gray-800' : 'bg-gray-100'
+                    isDark ? "bg-gray-800" : "bg-gray-100"
                   }`}
                 />
                 <button 
@@ -268,13 +252,12 @@ const App: React.FC = () => {
               </div>
             </form>
 
-            {/* Tasks */}
             <div className="space-y-2">
               {lists[currentList].tasks.map(task => (
                 <div 
                   key={task.id}
                   className={`flex items-center gap-2 p-2 rounded-lg ${
-                    isDark ? 'bg-gray-800' : 'bg-gray-100'
+                    isDark ? "bg-gray-800" : "bg-gray-100"
                   }`}
                 >
                   <input
@@ -283,7 +266,7 @@ const App: React.FC = () => {
                     onChange={() => toggleTask(task.id)}
                     className="w-5 h-5"
                   />
-                  <span className={task.checked ? 'line-through' : ''}>
+                  <span className={task.checked ? "line-through" : ""}>
                     {task.text}
                   </span>
                   <button
@@ -296,7 +279,6 @@ const App: React.FC = () => {
               ))}
             </div>
 
-            {/* Reset Button */}
             {lists[currentList].tasks.some(task => task.checked) && (
               <button
                 onClick={resetList}
